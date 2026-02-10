@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="HONGYOU WANG">
+
+
+
+
+
+<title>动手学深度学习1 | Hexo</title>
+
+
+
+    <link rel="icon" href="/WHY.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 8.1.1"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const pagebody = document.getElementsByTagName('body')[0]
+
+            function setTheme(status) {
+
+                if (status === 'dark') {
+                    window.sessionStorage.theme = 'dark'
+                    pagebody.classList.add('dark-theme');
+
+                } else if (status === 'light') {
+                    window.sessionStorage.theme = 'light'
+                    pagebody.classList.remove('dark-theme');
+                }
+            };
+
+            setTheme(window.sessionStorage.theme)
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">WHY&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                <a class="menu-item" href="/archives">Posts</a>
+                
+                <a class="menu-item" href="/category">Categories</a>
+                
+                <a class="menu-item" href="/tag">Tags</a>
+                
+                <a class="menu-item" href="/about">About</a>
+                
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">WHY&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">
+                    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M4.5 17.27q-.213 0-.356-.145T4 16.768t.144-.356t.356-.143h15q.213 0 .356.144q.144.144.144.357t-.144.356t-.356.143zm0-4.77q-.213 0-.356-.144T4 11.999t.144-.356t.356-.143h15q.213 0 .356.144t.144.357t-.144.356t-.356.143zm0-4.77q-.213 0-.356-.143Q4 7.443 4 7.23t.144-.356t.356-.143h15q.213 0 .356.144T20 7.23t-.144.356t-.356.144z"/></svg>
+                    <svg class="close-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols Light by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="m12 12.708l-5.246 5.246q-.14.14-.344.15t-.364-.15t-.16-.354t.16-.354L11.292 12L6.046 6.754q-.14-.14-.15-.344t.15-.364t.354-.16t.354.16L12 11.292l5.246-5.246q.14-.14.345-.15q.203-.01.363.15t.16.354t-.16.354L12.708 12l5.246 5.246q.14.14.15.345q.01.203-.15.363t-.354.16t-.354-.16z"/></svg>
+                </div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                <a class="menu-item" href="/archives">Posts</a>
+                
+                <a class="menu-item" href="/category">Categories</a>
+                
+                <a class="menu-item" href="/tag">Tags</a>
+                
+                <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if (toggleMenu.classList.contains("active")) {
+            toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        } else {
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">动手学深度学习1</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">HONGYOU WANG</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">February 9, 2026&nbsp;&nbsp;23:35:04</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">动手学深度学习</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="动手学深度学习（李沐课程）"><a href="#动手学深度学习（李沐课程）" class="headerlink" title="动手学深度学习（李沐课程）"></a>动手学深度学习（李沐课程）</h1><h2 id="前文我对于深度学习的感悟"><a href="#前文我对于深度学习的感悟" class="headerlink" title="前文我对于深度学习的感悟"></a>前文我对于深度学习的感悟</h2><h2 id="过拟合和欠拟合"><a href="#过拟合和欠拟合" class="headerlink" title="过拟合和欠拟合"></a>过拟合和欠拟合</h2><p>模型的复杂度一般取决于，1 权重的变化范围，2 权重的个数，为了防止过拟合这里提到了正则化。</p>
+<h3 id="权重衰退"><a href="#权重衰退" class="headerlink" title="权重衰退"></a>权重衰退</h3><p>利用在loss函数的后面加上L1或者L2的正则惩罚项，将loss的最优解偏移，防止对训练数据过拟合。更直观的理解是，在我的数据中有很多噪音，他们可以看做是随机分布没有规律的，如果我们的w可以上下移动的距离太大的话，我们训练拟合的函数可以是任何陡峭的形状，最严重的情况是，w最后可以拟合到经过了所有的点（包括噪音点）。这样就将噪音全部学习进去了，导致过拟合。<br>而权重衰退是在loss函数的后面加上L2范式，L2就是1/2w^2（加1/2是为了方便求导）,如果是L1的话就是w</p>
+<script type="math/tex; mode=display">
+||w||^2<a</script><script type="math/tex; mode=display">
+min(loss(w,b))+lambd/2||w||^2</script><p>lambd是我们定义的超参数，lambd越大，说明正则化越强，lambd如果过大的话w就趋于零，导致欠拟合。<br>将（2）当做最后的“损失函数”，然后梯度下降，最后得到的权重不会像之前那么大，从而做到将函数变得更平缓，不会出现过拟合的现象。本质上是降低了模型的复杂度（因为降低了w的取值范围）。<br>之所以叫权重衰退，是因为在进行参数更新的时候，我们在减去原来的梯度×学习率的同时，会减去学习率×lambd×w，相当于额外对权重进行了衰退，所以叫权重衰退。<br>我们可以得到梯度是</p>
+<script type="math/tex; mode=display">
+d((loss(w,b))+lambd/2||w||^2)/dw = d(loss(w,b))/dw+lambd*w</script><script type="math/tex; mode=display">
+W_{t+1} = W_t-lr*d(loss(w,b))/dw-lr*lambd*W_t</script><h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><p>生成数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">n_train,n_test,num_imputs,batch_size = 20,100,200,10</span><br><span class="line">true_w,true_b = torch.ones((num_imputs,1)) * 0.01,0.05</span><br><span class="line">train_data = d2l.synthetic_data(true_w,true_b,n_train)</span><br><span class="line">train_iter = d2l.load_array(train_data,batch_size)</span><br><span class="line">test_data = d2l.synthetic_data(true_w,true_b,n_test)</span><br><span class="line">test_iter = d2l.load_array(test_data,batch_size,is_train=False)</span><br></pre></td></tr></table></figure>
+<p>初始化参数如下：</p>
+<script type="math/tex; mode=display">
+true_w = 
+\begin{bmatrix}
+0.01\\
+0.01\\
+0.01\\
+0.01\\
+...
+\end{bmatrix}
+\quad true_b = 0.05</script><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def init_params():</span><br><span class="line">    w = torch.normal(0,1,size=(num_imputs,1),requires_grad=True)</span><br><span class="line">    b = torch.zeros(1,requires_grad=True)</span><br><span class="line">    return[w,b]</span><br></pre></td></tr></table></figure>
+<p>设置初始的w和b</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">def penatly(w):</span><br><span class="line">    return torch.sum(w.pow(2))/2</span><br></pre></td></tr></table></figure>
+<p>定义权重衰退L2 正则化的名字就来源于 “L2 范数”，而 L2 范数的数学定义是：<br>∥w∥2=w12+w22+⋯+wn2<br>（w 是权重向量，w1,w2…wn 是其中的每个元素）<br>简单说，L2 范数就是 “权重向量的长度”，而我们代码里的 <code>torch.sum(w.pow(2))</code> 就是计算这个范数的<strong>平方</strong>（去掉平方根，计算更方便）；除以 2 是为了后续求导时抵消系数（对 21∑wi2 求导刚好得到 wi，不用额外处理系数）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def train(lambd):</span><br><span class="line">    w,b = init_params()</span><br><span class="line">    net,loss = lambda X:d2l.linreg(X,w,b),d2l.squared_loss</span><br><span class="line">    num_epochs,lr = 100,0.003</span><br><span class="line">    animator = d2l.Animator(xlabel='epochs', ylabel='loss', yscale='log',</span><br><span class="line">                            xlim=[5, num_epochs], legend=['train', 'test'])</span><br><span class="line">    for epoch in range(num_epochs):</span><br><span class="line">        for X,y in train_iter:</span><br><span class="line">            l = loss(net(X),y)+lambd * penatly(w)</span><br><span class="line">            l.sum().backward()</span><br><span class="line">            d2l.sgd([w,b],lr,batch_size)</span><br><span class="line">        if(epoch+1)%5==0:</span><br><span class="line">            animator.add(epoch + 1, (d2l.evaluate_loss(net, train_iter，loss),</span><br><span class="line">                                     d2l.evaluate_loss(net, test_iter, loss)))</span><br><span class="line">    print('w的L2范数是：', torch.norm(w).item())</span><br></pre></td></tr></table></figure>
+<p>这里的 <code>lambda X:d21.linreg(X,w,b)</code> 是：</p>
+<ul>
+<li>定义了一个<strong>匿名函数</strong>，参数是 <code>X</code>（模型的输入特征）；</li>
+<li>函数体是调用 <code>d21.linreg(X,w,b)</code>（线性回归的前向计算函数，输入特征 <code>X</code>、权重 <code>w</code>、偏置 <code>b</code>，返回预测值）；</li>
+<li>把这个匿名函数赋值给变量 <code>net</code>，所以后续调用 <code>net(X)</code> 就等价于调用 <code>d21.linreg(X,w,b)</code>。</li>
+</ul>
+<h4 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=0)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209224212269.png" alt="image-20260209224212269" style="zoom: 80%;"></p>
+<p>可以看到现在是过拟合的状态（因为只用了20个数据训练很容易过拟合）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=10)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209224418719.png" alt="image-20260209224418719" style="zoom:80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=20)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209224552614.png" alt="image-20260209224552614" style="zoom:80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=100)</span><br></pre></td></tr></table></figure>
+<p>这个时候L2范数已经达到了0.005</p>
+<p><img src="/images/image-20260209224752199.png" alt="image-20260209224752199" style="zoom:80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=200)</span><br></pre></td></tr></table></figure>
+<p>L2：0.003</p>
+<p><img src="/images/image-20260209224832501.png" alt="image-20260209224832501" style="zoom:80%;"></p>
+<p>现在将L2范数权重衰退改成L1范数（即用|w1|+|w2|+|w3|+|w4|）</p>
+<p><strong>L1 范数的导数：不是 “全局常数”，是 “符号函数（sign）”</strong></p>
+<ul>
+<li>是“分段常数”：对<strong>单个参数</strong>来说，只要它的符号不变（比如一直&gt;0），导数就是固定的 1（看起来像“常数”），但符号变了，导数就会变成 -1；</li>
+<li>对比 L2 范数的导数：L2 范数平方的一半 21∥w∥22 对 wi 的导数是 wi（随参数大小连续变化），而 L1 导数只和符号有关，和参数大小无关。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">def penatly(w):</span><br><span class="line">    return torch.sum(w)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">l = loss(net(X),y)+lambd * penatly(w)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=10)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209225246392.png" alt="image-20260209225246392" style="zoom:80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=20)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209225328702.png" alt="image-20260209225328702" style="zoom:80%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train(lambd=100)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20260209225358391.png" alt="image-20260209225358391" style="zoom:80%;"></p>
+<p><strong>我的理解：L2范数求导后是|w|在用L2范数的时候惩罚力度的大小不仅和设置的lambd有关，还和自身W的大小有关，当拟合的W太大了自然会将惩罚力度加大，防止过拟合。而L1范数求导完之后等于参数的个数，与W无关，在W大的时候无法形成有效的负反馈，所以总体上L2做的比L1好（L2将loss控制在0.01，L1只能控制在0.1）</strong></p>
+<h4 id="代码的简洁实现"><a href="#代码的简洁实现" class="headerlink" title="代码的简洁实现"></a>代码的简洁实现</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">def train_concise(wd):</span><br><span class="line">    net = nn.Sequential(nn.Linear(num_imputs,1))</span><br><span class="line">    for param in net.parameters():</span><br><span class="line">        param.data.normal_()</span><br><span class="line">    loss = nn.MSELoss()</span><br><span class="line">    num_epochs,lr = 100,0.003</span><br><span class="line">    trainer = torch.optim.SGD([{"params":net[0].weight,'weight_decay': wd},{"params":net[0].bias}], lr=lr)</span><br><span class="line">    animator = d2l.Animator(xlabel='epochs', ylabel='loss', yscale='log',xlim=[5, num_epochs], legend=['train', 'test'])</span><br><span class="line">    for epoch in range(num_epochs):</span><br><span class="line">        for X,y in train_iter:</span><br><span class="line">            with torch.enable_grad():</span><br><span class="line">                trainer.zero_grad()</span><br><span class="line">                l = loss(net(X),y)</span><br><span class="line">            l.backward()</span><br><span class="line">            trainer.step()</span><br><span class="line">        if (epoch + 1) % 5 == 0:</span><br><span class="line">            animator.add(epoch + 1,</span><br><span class="line">                         (d2l.evaluate_loss(net, train_iter, loss),</span><br><span class="line">                          d2l.evaluate_loss(net, test_iter, loss)))</span><br><span class="line">    print('w的L2范数：', net[0].weight.norm().item())</span><br></pre></td></tr></table></figure>
+<p><code>normal_()</code> 的作用是：</p>
+<ul>
+<li>把 <code>param.data</code> 这个张量里的<strong>所有元素</strong>，随机赋值为服从「标准正态分布」（均值 μ=0，标准差 σ=1）的数值；</li>
+<li>后缀 <code>_</code> 表示这是<strong>原地操作</strong>—— 直接修改 <code>param.data</code> 本身的数值，而不是返回一个新的张量（节省内存，适合参数初始化）。</li>
+</ul>
+<p><code>torch.optim.SGD()</code> 基础</p>
+<p>这是 PyTorch 内置的 SGD 优化器构造函数，核心参数有两类：</p>
+<ul>
+<li>第一类（必传）：待优化的参数（可以是参数列表 / 参数组列表）；</li>
+<li>第二类（可选）：全局优化超参数（如<code>lr</code>、<code>momentum</code>、<code>weight_decay</code>等）。</li>
+</ul>
+<p><code>[{"params":...}, {"params":...}]</code></p>
+<p>这是最关键的设计 ——PyTorch 支持对<strong>不同参数设置不同的优化规则</strong>，通过 “参数组（字典）” 实现：</p>
+<ul>
+<li>每个字典对应一个 “参数组”，<code>params</code>键指定该组的参数对象；</li>
+<li>字典内可以设置该组专属的优化参数（如<code>weight_decay</code>）；</li>
+<li>未在组内指定的参数，会继承全局超参数（如<code>lr</code>）。</li>
+</ul>
+<p><strong>这里有两个参数所以有两个{}{}，然后只有在第一个w参数里应用权重衰减，所以才在{“params”:net[0].weight,  的后面有’weight_decay’: wd}第二个参数{“params”:net[0].bias}里面没有weight_decay这一项</strong></p>
+<p>虽然训练阶段梯度计算默认是开启的，但<strong>显式写 <code>with torch.enable_grad():</code> 是更规范的写法</strong>：</p>
+<ol>
+<li><p>明确标注 “这段代码需要计算梯度”，提升代码可读性；</p>
+</li>
+<li><p>防止全局梯度计算被意外关闭（比如代码其他地方用了 <code>torch.no_grad()</code> 但没恢复），保证训练时梯度能正常计算；</p>
+</li>
+<li><p>把 “梯度相关操作”（清空梯度、计算损失）限定在上下文内，逻辑更清晰。</p>
+<p> <strong>进入代码块</strong>：自动开启梯度计算；</p>
+<p> <strong>退出代码块</strong>：自动恢复到进入前的梯度计算状态（比如原本是关闭的，退出后仍关闭）；</p>
+<p> 好处：无需手动调用 <code>torch.enable_grad()</code>/<code>torch.no_grad()</code> 来回切换，避免遗漏恢复步骤。</p>
+</li>
+</ol>
+<p><code>trainer.zero_grad()</code> +<code>l.backward()</code>+<code>trainer.step()</code> 是深度学习的<strong>hello world</strong></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>HONGYOU WANG</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2026/02/09/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/">http://example.com/2026/02/09/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"># 动手学深度学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2026/02/10/%E8%A7%A3%E5%86%B3Chic%E4%B8%BB%E9%A2%98%E4%B8%8Etypora%E8%A7%A3%E6%9E%90%E4%B8%8D%E5%8C%B9%E9%85%8D%E7%9A%84%E4%B8%80%E7%B3%BB%E5%88%97%E9%97%AE%E9%A2%98/">解决Chic主题与typora解析不匹配的一系列问题</a>
+            
+            
+            <a class="next" rel="next" href="/2026/02/09/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/">自我介绍</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© HONGYOU WANG | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

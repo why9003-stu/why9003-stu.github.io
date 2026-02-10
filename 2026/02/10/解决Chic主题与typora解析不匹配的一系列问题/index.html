@@ -13,7 +13,7 @@
 
 
 
-<title>自我介绍 | Hexo</title>
+<title>解决Chic主题与typora解析不匹配的一系列问题 | Hexo</title>
 
 
 
@@ -203,7 +203,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">自我介绍</h1>
+            <h1 class="post-title">解决Chic主题与typora解析不匹配的一系列问题</h1>
             
                 <div class="post-meta">
                     
@@ -212,14 +212,14 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">February 9, 2026&nbsp;&nbsp;13:36:22</a>
+                        Date: <a href="#">February 10, 2026&nbsp;&nbsp;10:34:25</a>
                         </span>
                     
                     
                         <span class="post-category">
                     Category:
                             
-                                <a href="/categories/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/">自我介绍</a>
+                                <a href="/categories/%E7%BD%91%E7%AB%99%E8%A7%A3%E6%9E%90%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/">网站解析问题解决</a>
                             
                         </span>
                     
@@ -228,10 +228,82 @@
         </header>
 
         <div class="post-content">
-            <h1 id="你好"><a href="#你好" class="headerlink" title="你好"></a>你好</h1><hr>
-<h2 id="现在是2026年2月9号"><a href="#现在是2026年2月9号" class="headerlink" title="现在是2026年2月9号"></a>现在是2026年2月9号</h2><h2 id="这是我的第一篇博客"><a href="#这是我的第一篇博客" class="headerlink" title="这是我的第一篇博客"></a>这是我的第一篇博客</h2><h2 id="接下来我将在我的博客中记录我的日常学习笔记和感悟"><a href="#接下来我将在我的博客中记录我的日常学习笔记和感悟" class="headerlink" title="接下来我将在我的博客中记录我的日常学习笔记和感悟"></a>接下来我将在我的博客中记录我的日常学习笔记和感悟</h2><hr>
-<h5 id="我是苏州大学材料与化学化工学部化学-新能源材料与器件专业的王宏猷，"><a href="#我是苏州大学材料与化学化工学部化学-新能源材料与器件专业的王宏猷，" class="headerlink" title="我是苏州大学材料与化学化工学部化学+新能源材料与器件专业的王宏猷，"></a>我是苏州大学材料与化学化工学部化学+新能源材料与器件专业的王宏猷，</h5><p><strong>目前在学习人工智能+化学的方向，</strong></p>
-<p><strong>博客上会传入有关我的计算机和化学的学习内容</strong></p>
+            <h1 id="问1：公式不显示，我用的是Chic主题"><a href="#问1：公式不显示，我用的是Chic主题" class="headerlink" title="问1：公式不显示，我用的是Chic主题"></a>问1：公式不显示，我用的是Chic主题</h1><p>在根目录下进行操作，打开 git bash</p>
+<ol>
+<li>卸载默认渲染器：<code>npm uninstall hexo-renderer-marked --save</code></li>
+<li><p>安装新渲染器：<code>npm install hexo-renderer-kramed --save</code> </p>
+</li>
+<li><p>运行 <code>hexo clean</code>，然后 <code>hexo g</code>，最后 <code>hexo s</code> 预览。</p>
+</li>
+</ol>
+<p>如果你的博客里同时存在 <code>hexo-renderer-kramed</code>（你刚装的）和 <code>hexo-renderer-mathjax</code>（可能以前装的），它们会<strong>打架</strong>。</p>
+<ul>
+<li><strong>后果</strong>：Hexo 在生成页面时会报错，或者公式渲染出来是双份的、乱码的。</li>
+<li><strong>如果不卸载</strong>：如果它确实存在，你的配置可能永远都不生效，所以还要 npm uninstall hexo-renderer-mathjax —save</li>
+</ul>
+<h1 id="问2：矩阵没有显示出来"><a href="#问2：矩阵没有显示出来" class="headerlink" title="问2：矩阵没有显示出来"></a>问2：矩阵没有显示出来</h1><p><strong>“公式的前面和后面都有代码块”</strong> 很可能就是问题的核心原因。</p>
+<p><strong>在上面的代码块和下面的公式之间，强行加一行文字。</strong></p>
+<p>看你的截图，你的公式里用了一个 <code>&amp;</code> 符号： <code>... \end{bmatrix} &amp;true_b = 0.05</code></p>
+<p><strong>缺少“空行”（最主要原因）</strong> 在 Markdown 语法中，<strong>文字段落</strong>和<strong>数学公式块</strong>之间，必须有一个<strong>完全空白的空行</strong>。 看你的截图，“初始化参数如下：”这句话和下面的公式是紧挨着的。这导致 Hexo 觉得它们是同一段话，于是渲染器就晕了，直接把公式当成代码显示了。</p>
+<ul>
+<li><em>修正：敲一个回车，把它们隔开。</em></li>
+</ul>
+<p>你的公式里用了一个 <code>&amp;</code> 符号（<code>&amp;true_b = 0.05</code>），而且是直接放在 $$$$ 里面。 在标准的 LaTeX 中，<code>&amp;</code> 只能在对齐环境（如 <code>aligned</code>）里使用。如果直接裸着用，MathJax 解析时会报错，或者直接放弃渲染。</p>
+<ul>
+<li><em>修正：改用 <code>\quad</code>（空格）</em></li>
+</ul>
+<h1 id="问3：一开始是用typora写的文章，里面的图片是直接截图粘贴下来的，然后直接复制源码到博客上的，我现在想把我的图片传到Chic主题的博客上去怎么传"><a href="#问3：一开始是用typora写的文章，里面的图片是直接截图粘贴下来的，然后直接复制源码到博客上的，我现在想把我的图片传到Chic主题的博客上去怎么传" class="headerlink" title="问3：一开始是用typora写的文章，里面的图片是直接截图粘贴下来的，然后直接复制源码到博客上的，我现在想把我的图片传到Chic主题的博客上去怎么传"></a>问3：一开始是用typora写的文章，里面的图片是直接截图粘贴下来的，然后直接复制源码到博客上的，我现在想把我的图片传到Chic主题的博客上去怎么传</h1><h3 id="第一步：创建存放图片的“仓库”"><a href="#第一步：创建存放图片的“仓库”" class="headerlink" title="第一步：创建存放图片的“仓库”"></a>第一步：创建存放图片的“仓库”</h3><p>你需要把图片放到 Hexo 能“抓取”到的地方，而不是留在 C 盘的 Typora 临时文件夹里。</p>
+<ol>
+<li>打开文件夹：<code>D:\Blog\source\</code>。</li>
+<li>在这个目录下，新建一个文件夹，名字叫 <strong><code>images</code></strong>。<ul>
+<li>现在你的目录结构应该是：<code>D:\Blog\source\images\</code>。</li>
+</ul>
+</li>
+</ol>
+<h3 id="第二步：把图片“搬”进去"><a href="#第二步：把图片“搬”进去" class="headerlink" title="第二步：把图片“搬”进去"></a>第二步：把图片“搬”进去</h3><ol>
+<li>去你刚才那个 <code>C:\Users\DELL\...\typora-user-images\</code> 文件夹里（就是你截图里那个路径）。</li>
+<li>找到你在文章里用的图片（比如 <code>image-2026xxxx.png</code>）。</li>
+<li>把它<strong>复制</strong>出来，<strong>粘贴</strong>到刚才建好的 <code>D:\Blog\source\images\</code> 文件夹里。</li>
+</ol>
+<h3 id="第三步：修改文章里的代码"><a href="#第三步：修改文章里的代码" class="headerlink" title="第三步：修改文章里的代码"></a>第三步：修改文章里的代码</h3><p>现在图片已经归位了，我们要去 Markdown 文件里修改“路牌”，告诉博客去哪里找这张图。</p>
+<ol>
+<li>打开你的文章文件（在 <code>D:\Blog\source\_posts\</code> 下）。</li>
+<li>找到那段 <code>&lt;img src=&quot;...&quot;&gt;</code> 代码。</li>
+<li>将 <code>src</code> 里面的长路径，改成 <strong><code>/images/图片文件名</code></strong>。</li>
+</ol>
+<p>原来的路径：img src=”C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20260209224212269.png” alt=”…” style=”zoom: 80%;” </p>
+<p>改后的路径：img src=”/images/image-20260209224212269.png” alt=”image-20260209224212269” style=”zoom: 80%;” </p>
+<h1 id="问4：为什么我修改过后在typora中不显示图片"><a href="#问4：为什么我修改过后在typora中不显示图片" class="headerlink" title="问4：为什么我修改过后在typora中不显示图片"></a>问4：为什么我修改过后在typora中不显示图片</h1><ul>
+<li><strong>你的代码</strong>：<code>&lt;img src=&quot;/images/xxx.png&quot;&gt;</code><ul>
+<li>这个斜杠 <code>/</code> 开头，意思是“<strong>从根目录开始找</strong>”。</li>
+</ul>
+</li>
+<li><strong>Hexo 博客（浏览器）</strong>：它知道你的网站“根目录”就是网站主页，下面确实有个 <code>images</code> 文件夹，所以<strong>博客能显示</strong>。</li>
+<li><strong>Typora（编辑器）</strong>：它默认认为“根目录”是你电脑的 <strong>D盘根目录</strong>（<code>D:\</code>）。它去 <code>D:\images\</code> 找图片，当然找不到（因为图片实际在 <code>D:\Blog\source\images\</code>）</li>
+</ul>
+<p>你需要修改 Typora 的设置，让它知道：“当我写 <code>/</code> 的时候，其实是指 <code>D:\Blog\source</code> 这个文件夹。”</p>
+<p>请跟着我做：</p>
+<ol>
+<li><p><strong>打开你的 Typora</strong>（保持打开你那篇博客文章的状态）。</p>
+</li>
+<li><p>点击顶部菜单栏的 <strong>“格式” (Format)</strong>。</p>
+</li>
+<li><p>选择 <strong>“图像” (Image)</strong>。</p>
+</li>
+<li><p>点击 <strong>“设置图片根目录” (Set Image Root Path)</strong>。 <em>(或者直接在菜单栏里找“文件” -&gt; “偏好设置” -&gt; “图像” -&gt; 也可以设置)</em></p>
+<p> <em>(Typora 界面示意)</em></p>
+</li>
+<li><p><strong>关键步骤（千万别选错文件夹）</strong>： 在弹出的选择框里，找到并选中这个文件夹： 👉 <strong><code>D:\Blog\source</code></strong></p>
+<blockquote>
+<p><strong>注意</strong>：</p>
+<ul>
+<li><strong>不要</strong>选 <code>D:\Blog</code></li>
+<li><strong>不要</strong>选 <code>D:\Blog\source\images</code></li>
+<li><strong>一定要选</strong> <code>D:\Blog\source</code></li>
+</ul>
+</blockquote>
+</li>
+</ol>
 
         </div>
 
@@ -246,7 +318,7 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://example.com/2026/02/09/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/">http://example.com/2026/02/09/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/</a></span>
+                        <span><a href="http://example.com/2026/02/10/%E8%A7%A3%E5%86%B3Chic%E4%B8%BB%E9%A2%98%E4%B8%8Etypora%E8%A7%A3%E6%9E%90%E4%B8%8D%E5%8C%B9%E9%85%8D%E7%9A%84%E4%B8%80%E7%B3%BB%E5%88%97%E9%97%AE%E9%A2%98/">http://example.com/2026/02/10/%E8%A7%A3%E5%86%B3Chic%E4%B8%BB%E9%A2%98%E4%B8%8Etypora%E8%A7%A3%E6%9E%90%E4%B8%8D%E5%8C%B9%E9%85%8D%E7%9A%84%E4%B8%80%E7%B3%BB%E5%88%97%E9%97%AE%E9%A2%98/</a></span>
                     </p>
                 
                 
@@ -270,7 +342,7 @@
                 <span class="tag">
                     
                     
-                        <a href="/tags/%E8%87%AA%E6%88%91%E4%BB%8B%E7%BB%8D/"># 自我介绍</a>
+                        <a href="/tags/%E7%BD%91%E7%AB%99%E8%A7%A3%E6%9E%90%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/"># 网站解析问题解决</a>
                     
                         
                 </span>
@@ -283,10 +355,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2026/02/09/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/">动手学深度学习1</a>
             
-            
-            <a class="next" rel="next" href="/2026/02/09/test/">test</a>
+            <a class="next" rel="next" href="/2026/02/09/%E5%8A%A8%E6%89%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A01/">动手学深度学习1</a>
             
         </section>
 

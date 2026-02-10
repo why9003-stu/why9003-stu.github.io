@@ -379,8 +379,116 @@ mjx-container[display="true"] + br {
         </header>
 
         <div class="post-content">
-            <h1 id="动手学深度学习（李沐课程）"><a href="#动手学深度学习（李沐课程）" class="headerlink" title="动手学深度学习（李沐课程）"></a>动手学深度学习（李沐课程）</h1><h2 id="前文我对于深度学习的感悟"><a href="#前文我对于深度学习的感悟" class="headerlink" title="前文我对于深度学习的感悟"></a>前文我对于深度学习的感悟</h2><h2 id="过拟合和欠拟合"><a href="#过拟合和欠拟合" class="headerlink" title="过拟合和欠拟合"></a>过拟合和欠拟合</h2><p>模型的复杂度一般取决于，1 权重的变化范围，2 权重的个数，为了防止过拟合这里提到了正则化。</p>
-<h3 id="权重衰退"><a href="#权重衰退" class="headerlink" title="权重衰退"></a>权重衰退</h3><p>利用在loss函数的后面加上L1或者L2的正则惩罚项，将loss的最优解偏移，防止对训练数据过拟合。更直观的理解是，在我的数据中有很多噪音，他们可以看做是随机分布没有规律的，如果我们的w可以上下移动的距离太大的话，我们训练拟合的函数可以是任何陡峭的形状，最严重的情况是，w最后可以拟合到经过了所有的点（包括噪音点）。这样就将噪音全部学习进去了，导致过拟合。<br>而权重衰退是在loss函数的后面加上L2范式，L2就是1/2w^2（加1/2是为了方便求导）,如果是L1的话就是w</p>
+            <h1 id="基础代码理解"><a href="#基础代码理解" class="headerlink" title="基础代码理解"></a>基础代码理解</h1><h2 id="基础pytorch"><a href="#基础pytorch" class="headerlink" title="基础pytorch"></a>基础pytorch</h2><h4 id="1-torch-zeros-——-手动指定形状创建全-0-张量"><a href="#1-torch-zeros-——-手动指定形状创建全-0-张量" class="headerlink" title="1. torch.zeros() —— 手动指定形状创建全 0 张量"></a>1. <code>torch.zeros()</code> —— 手动指定形状创建全 0 张量</h4><ul>
+<li><strong>功能</strong>：PyTorch 顶层函数，创建一个<strong>新的</strong>指定形状的全 0 张量，可手动指定数据类型、设备（CPU/GPU）。</li>
+<li><strong>用法</strong>：<code>torch.zeros(size, dtype=None, device=None)</code></li>
+<li><strong>核心</strong>：需要手动传「形状参数」，创建全新张量。</li>
+</ul>
+<h4 id="2-torch-zeros-like-input-——-复用已有张量属性创建全-0-张量"><a href="#2-torch-zeros-like-input-——-复用已有张量属性创建全-0-张量" class="headerlink" title="2. torch.zeros_like(input) —— 复用已有张量属性创建全 0 张量"></a>2. <code>torch.zeros_like(input)</code> —— 复用已有张量属性创建全 0 张量</h4><ul>
+<li><strong>功能</strong>：PyTorch 顶层函数，创建一个<strong>新的</strong>全 0 张量，形状、数据类型、设备<strong>完全复用输入张量 <code>input</code></strong>，无需手动指定形状。</li>
+<li><strong>用法</strong>：<code>torch.zeros_like(input)</code></li>
+<li><strong>核心</strong>：「跟着输入张量走」，避免手动匹配形状 / 设备，是你之前 Dropout 代码中 <code>torch.zeros_like(X)</code> 的用法。</li>
+</ul>
+<h4 id="3-tensor-zero-——-生成和原张量属性相同的新全-0-张量"><a href="#3-tensor-zero-——-生成和原张量属性相同的新全-0-张量" class="headerlink" title="3. tensor.zero() —— 生成和原张量属性相同的新全 0 张量"></a>3. <code>tensor.zero()</code> —— 生成和原张量属性相同的新全 0 张量</h4><ul>
+<li><strong>功能</strong>：张量的<strong>实例方法</strong>，返回一个<strong>新的</strong>全 0 张量（形状、数据类型、设备和原张量一致），<strong>不修改原张量</strong>。</li>
+<li><strong>用法</strong>：<code>已有张量.zero()</code></li>
+<li><strong>注意</strong>：没有 <code>torch.zero()</code> 这个顶层函数，只有张量实例才能调用 <code>zero()</code>。</li>
+</ul>
+<h4 id="4-tensor-zero-——-原地将原张量置为全-0"><a href="#4-tensor-zero-——-原地将原张量置为全-0" class="headerlink" title="4. tensor.zero_() —— 原地将原张量置为全 0"></a>4. <code>tensor.zero_()</code> —— 原地将原张量置为全 0</h4><ul>
+<li><strong>功能</strong>：张量的<strong>实例方法</strong>，带 <code>_</code> 后缀表示「原地操作」，直接将原张量的所有元素改为 0，<strong>返回的是原张量本身（无新张量）</strong>。</li>
+<li><strong>用法</strong>：<code>已有张量.zero_()</code></li>
+<li><strong>核心</strong>：修改原张量，节省内存（无需创建新张量）。</li>
+</ul>
+<p><strong>总结：只有_紧跟()的才是对原数据进行修改，其他都是创建了一个新的矩阵</strong></p>
+<h4 id="1-torch-rand-——-0-1-均匀分布的浮点数张量"><a href="#1-torch-rand-——-0-1-均匀分布的浮点数张量" class="headerlink" title="1. torch.rand() —— 0~1 均匀分布的浮点数张量"></a>1. <code>torch.rand()</code> —— 0~1 均匀分布的浮点数张量</h4><ul>
+<li><strong>核心功能</strong>：PyTorch 顶层函数，创建指定形状的新张量，元素服从 <strong>[0, 1) 左闭右开区间的均匀分布</strong>（包含 0，不包含 1）；</li>
+<li><strong>用法</strong>：<code>torch.rand(size, dtype=None, device=None)</code>；</li>
+</ul>
+<h4 id="2-torch-randn-——-标准正态分布的浮点数张量"><a href="#2-torch-randn-——-标准正态分布的浮点数张量" class="headerlink" title="2. torch.randn() —— 标准正态分布的浮点数张量"></a>2. <code>torch.randn()</code> —— 标准正态分布的浮点数张量</h4><ul>
+<li><strong>核心功能</strong>：PyTorch 顶层函数，创建指定形状的新张量，元素服从 <strong>标准正态分布（均值 μ=0，方差 σ²=1）</strong>；</li>
+<li><strong>取值特点</strong>：数值可正可负，约 68% 的值在 [-1, 1] 之间，约 95% 在 [-2, 2] 之间，极少出现 ±3 以外的值；</li>
+<li><strong>用法</strong>：<code>torch.randn(size, dtype=None, device=None)</code>；</li>
+</ul>
+<h4 id="1-普通矩阵乘法（线性代数标准乘法）"><a href="#1-普通矩阵乘法（线性代数标准乘法）" class="headerlink" title="1. 普通矩阵乘法（线性代数标准乘法）"></a>1. 普通矩阵乘法（线性代数标准乘法）</h4><p>必须满足「前一个矩阵的列数 = 后一个矩阵的行数」，结果维度为 <code>(前矩阵行数 × 后矩阵列数)</code>，即 <code>(m×n) × (n×p) = (m×p)</code>。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>适用场景</th>
+<th>示例代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>torch.mm(A, B)</code></td>
+<td>仅适用于 2 维矩阵（无批量）</td>
+<td><code>A = torch.rand(2,3); B = torch.rand(3,2); C = torch.mm(A, B)</code>（结果 2×2）</td>
+</tr>
+<tr>
+<td><code>A @ B</code></td>
+<td>2 维 / 高维矩阵（最简洁）</td>
+<td><code>C = A @ B</code></td>
+</tr>
+<tr>
+<td><code>torch.matmul(A, B)</code></td>
+<td>2 维 / 高维 / 向量（最通用）</td>
+<td><code>C = torch.matmul(A, B)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="2-逐元素乘法（哈达玛积-Hadamard-Product）"><a href="#2-逐元素乘法（哈达玛积-Hadamard-Product）" class="headerlink" title="2. 逐元素乘法（哈达玛积 / Hadamard Product）"></a>2. 逐元素乘法（哈达玛积 / Hadamard Product）</h4><p>两个张量<strong>形状完全相同</strong>（或广播兼容），对应位置的元素相乘，结果形状和输入一致。你之前 Dropout 代码中 <code>mask * X</code> 就是这种乘法！</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>适用场景</th>
+<th>示例代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A * B</code></td>
+<td>所有维度（最简洁）</td>
+<td><code>A = torch.rand(2,3); B = torch.rand(2,3); C = A * B</code>（结果 2×3）</td>
+</tr>
+<tr>
+<td><code>torch.mul(A, B)</code></td>
+<td>所有维度（和 <code>*</code> 等价）</td>
+<td><code>C = torch.mul(A, B)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="3-向量点积（内积）"><a href="#3-向量点积（内积）" class="headerlink" title="3. 向量点积（内积）"></a>3. 向量点积（内积）</h4><p>两个<strong>一维张量（向量）</strong> 长度相同，对应元素相乘后求和，结果为标量。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>适用场景</th>
+<th>示例代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>torch.dot(a, b)</code></td>
+<td>仅适用于 1 维向量</td>
+<td><code>a = torch.rand(3); b = torch.rand(3); c = torch.dot(a, b)</code>（标量）</td>
+</tr>
+<tr>
+<td><code>torch.matmul(a, b)</code></td>
+<td>1 维向量（通用）</td>
+<td><code>c = torch.matmul(a, b)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>最常用的两种：普通矩阵乘法用 <code>@</code>（线性层计算），逐元素乘法用 <code>\*</code>（Dropout 掩码、权重相乘）；</strong></p>
+<h2 id="基础d2l封装函数"><a href="#基础d2l封装函数" class="headerlink" title="##基础d2l封装函数"></a>##基础d2l封装函数</h2><h1 id="第四章"><a href="#第四章" class="headerlink" title="第四章"></a>第四章</h1><h2 id="过拟合正则化"><a href="#过拟合正则化" class="headerlink" title="过拟合正则化"></a>过拟合正则化</h2><p>模型的复杂度一般取决于，1 权重的变化范围，2 权重的个数，为了防止过拟合这里提到了正则化。</p>
+<h3 id="权重衰退"><a href="#权重衰退" class="headerlink" title="权重衰退"></a>权重衰退</h3><h4 id="概念理解"><a href="#概念理解" class="headerlink" title="概念理解"></a>概念理解</h4><p>利用在loss函数的后面加上L1或者L2的正则惩罚项，将loss的最优解偏移，防止对训练数据过拟合。更直观的理解是，在我的数据中有很多噪音，他们可以看做是随机分布没有规律的，如果我们的w可以上下移动的距离太大的话，我们训练拟合的函数可以是任何陡峭的形状，最严重的情况是，w最后可以拟合到经过了所有的点（包括噪音点）。这样就将噪音全部学习进去了，导致过拟合。<br>而权重衰退是在loss函数的后面加上L2范式，L2就是1/2w^2（加1/2是为了方便求导）,如果是L1的话就是w</p>
 <script type="math/tex; mode=display">
 ||w||^2<a</script><script type="math/tex; mode=display">
 min(loss(w,b))+lambd/2||w||^2</script><p>lambd是我们定义的超参数，lambd越大，说明正则化越强，lambd如果过大的话w就趋于零，导致欠拟合。<br>将（2）当做最后的“损失函数”，然后梯度下降，最后得到的权重不会像之前那么大，从而做到将函数变得更平缓，不会出现过拟合的现象。本质上是降低了模型的复杂度（因为降低了w的取值范围）。<br>之所以叫权重衰退，是因为在进行参数更新的时候，我们在减去原来的梯度×学习率的同时，会减去学习率×lambd×w，相当于额外对权重进行了衰退，所以叫权重衰退。<br>我们可以得到梯度是</p>
@@ -470,6 +578,86 @@ true_w =
 </li>
 </ol>
 <p><code>trainer.zero_grad()</code> +<code>l.backward()</code>+<code>trainer.step()</code> 是深度学习的<strong>hello world</strong></p>
+<h3 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h3><h4 id="概念理解-1"><a href="#概念理解-1" class="headerlink" title="概念理解"></a>概念理解</h4><p>dropout也是一种防止过拟合的正则化方法，通过降低模型复杂度（降低隐藏层中神经元的个数）来达到防止过拟合的目的，狭义上的Dropout指随机去除隐藏层中神经元的个数，广义上的Dropout可以随机丢弃权重，label等等。<br>权重衰退的应用更加广泛，因为权重衰退可以用在各种算法上，而Dropout只能用在全连接的神经网络多层感知机（MLP）上，但他是最主流的多层感知机（MLP）的正则化方法</p>
+<p>在使用dropout时我们对隐藏层的每个元素进行如下操作</p>
+<script type="math/tex; mode=display">
+x_i=0(有p的概率)\quad x_i=x_i/1-p(对于其他的元素)</script><p>p使我们设定的超参数，之所以我们要将没有被丢弃的元素除（1-p）是为了让元素的期望不变即</p>
+<script type="math/tex; mode=display">
+E[x_i]=p*0+(1-p)*x_i/(1-p)=x_i</script><p>在具体的向前传播的过程是这样的，我们假设此时有三组数据，每组数据有4个参数，一层隐藏层,层中有3个神经元，作用dropout，超参数p设置为0.33，随机丢掉一个。<br>这里的x的第一个下标代表特征下标，第二个下标代表是第几个样本。w的第一个下标代表对应x的哪个特征，第二个下标代表是第几个重复神经元</p>
+<p>例如：（这里省略了bias）</p>
+<script type="math/tex; mode=display">
+trainX = 
+\begin{bmatrix}
+x_{11} & x_{21} & x_{31} & x_{41} \\
+x_{12} & x_{22} & x_{32} & x_{42} \\
+x_{13} & x_{23} & x_{33} & x_{43}
+\end{bmatrix}
+\quad 
+W=
+\begin{bmatrix}
+w_{11} & w_{12} & w_{13} \\
+w_{21} & w_{22} & w_{23} \\
+w_{31} & w_{32} & w_{33} \\
+w_{41} & w_{42} & w_{43}
+\end{bmatrix}</script><script type="math/tex; mode=display">
+原来的隐藏层= 
+\begin{bmatrix}
+(x_{11}w_{11} + x_{21}w_{21} + x_{31}w_{31} + x_{41}w_{41}) & (x_{11}w_{12} + x_{21}w_{22} + x_{31}w_{32} + x_{41}w_{42}) & (x_{11}w_{13} + x_{21}w_{23} + x_{31}w_{33} + x_{41}w_{43}) \\
+(x_{12}w_{11} + x_{22}w_{21} + x_{32}w_{31} + x_{42}w_{41}) & (x_{12}w_{12} + x_{22}w_{22} + x_{32}w_{32} + x_{42}w_{42}) & (x_{12}w_{13} + x_{22}w_{23} + x_{32}w_{33} + x_{42}w_{43}) \\
+(x_{13}w_{11} + x_{23}w_{21} + x_{33}w_{31} + x_{43}w_{41}) & (x_{13}w_{12} + x_{23}w_{22} + x_{33}w_{32} + x_{43}w_{42}) & (x_{13}w_{13} + x_{23}w_{23} + x_{33}w_{33} + x_{43}w_{43})
+\end{bmatrix}</script><script type="math/tex; mode=display">
+dropout的隐藏层= 
+\begin{bmatrix}
+(x_{11}w_{11} + x_{21}w_{21} + x_{31}w_{31} + x_{41}w_{41})/(1-p) & 0 & (x_{11}w_{13} + x_{21}w_{23} + x_{31}w_{33} + x_{41}w_{43})/(1-p) \\
+(x_{12}w_{11} + x_{22}w_{21} + x_{32}w_{31} + x_{42}w_{41})/(1-p) & 0 & (x_{12}w_{13} + x_{22}w_{23} + x_{32}w_{33} + x_{42}w_{43})/(1-p) \\
+(x_{13}w_{11} + x_{23}w_{21} + x_{33}w_{31} + x_{43}w_{41})/(1-p) & 0 & (x_{13}w_{13} + x_{23}w_{23} + x_{33}w_{33} + x_{43}w_{43})/(1-p)
+\end{bmatrix}</script><p>在上述过程中，随机dropout掉了第二个神经元，该轮反向传播时w12w22w32w42不进行更新(偏导数是<strong>0</strong>)，下一轮继续随机dropout，反向传播进行更新参数</p>
+<p><strong>注意Dropout是正则项，目的是为了让模型参数的训练正则化，所以只在训练的时候应用，不在测试和预测的时候应用Dropout</strong></p>
+<p><strong>这里我们注意到没有被Dropout的神经元的反向传播梯度被放大了（1-p）倍，为什么要放大呢</strong></p>
+<p>我们可以从链式法则的角度来看。假设某层输出为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.303ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 576 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"></path></g></g></g></svg></mjx-container>，应用 Dropout 后变为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.303ex" height="2.428ex" role="img" focusable="false" viewBox="0 -1062 576 1073"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><path data-c="210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"></path></g><g data-mml-node="mo" transform="translate(260.2,268) translate(-250 0)"><path data-c="5E" d="M112 560L249 694L257 686Q387 562 387 560L361 531Q359 532 303 581L250 627L195 580Q182 569 169 557T148 538L140 532Q138 530 125 546L112 560Z"></path></g></g></g></g></g></svg></mjx-container>，最终损失为 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.541ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 681 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g></g></g></svg></mjx-container>。<br>在训练阶段，由于引入了缩放因子 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -1.091ex;" xmlns="http://www.w3.org/2000/svg" width="3.845ex" height="3.048ex" role="img" focusable="false" viewBox="0 -864.9 1699.4 1347.1"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="mn" transform="translate(672.9,394) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mrow" transform="translate(220,-345) scale(0.707)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(500,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mi" transform="translate(1278,0)"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g><rect width="1459.4" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container>，前向传播公式为：</p>
+<script type="math/tex; mode=display">\hat{h} = \frac{mask \cdot h}{1-p}</script><p>根据链式法则，损失 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.541ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 681 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g></g></g></svg></mjx-container> 对原始输出 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.303ex" height="1.595ex" role="img" focusable="false" viewBox="0 -694 576 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"></path></g></g></g></svg></mjx-container> 的梯度为：</p>
+<script type="math/tex; mode=display">\frac{\partial L}{\partial h} = \frac{\partial L}{\partial \hat{h}} \cdot \frac{\partial \hat{h}}{\partial h} = \frac{\partial L}{\partial \hat{h}} \cdot \frac{mask}{1-p}</script><p><strong>结论：</strong> 对于没有被丢弃的神经元（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.186ex;" xmlns="http://www.w3.org/2000/svg" width="9.571ex" height="1.756ex" role="img" focusable="false" viewBox="0 -694 4230.6 776"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mi" transform="translate(878,0)"><path data-c="1D44E" d="M33 157Q33 258 109 349T280 441Q331 441 370 392Q386 422 416 422Q429 422 439 414T449 394Q449 381 412 234T374 68Q374 43 381 35T402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487Q506 153 506 144Q506 138 501 117T481 63T449 13Q436 0 417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157ZM351 328Q351 334 346 350T323 385T277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q217 26 254 59T298 110Q300 114 325 217T351 328Z"></path></g><g data-mml-node="mi" transform="translate(1407,0)"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mi" transform="translate(1876,0)"><path data-c="1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></g><g data-mml-node="mo" transform="translate(2674.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mn" transform="translate(3730.6,0)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g></g></g></svg></mjx-container>），其传回的梯度确实也被放大了 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -1.091ex;" xmlns="http://www.w3.org/2000/svg" width="3.845ex" height="3.048ex" role="img" focusable="false" viewBox="0 -864.9 1699.4 1347.1"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="mn" transform="translate(672.9,394) scale(0.707)"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mrow" transform="translate(220,-345) scale(0.707)"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(500,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mi" transform="translate(1278,0)"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g><rect width="1459.4" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container> 倍。</p>
+<hr>
+<p>对于这种放大的<strong>意义</strong><br>你可以从<strong>“能量守恒”</strong>或者<strong>“期望一致性”</strong>的角度来理解：</p>
+<ul>
+<li><p><strong>补偿消失的路径：</strong> 由于该轮迭代中随机丢弃了 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.138ex" height="1.439ex" role="img" focusable="false" viewBox="0 -442 503 636"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g></g></svg></mjx-container> 比例的神经元，这意味着有 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.138ex" height="1.439ex" role="img" focusable="false" viewBox="0 -442 503 636"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g></g></svg></mjx-container> 比例的梯度路径被彻底切断了（梯度为 0）。如果不放大剩下的 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="5.035ex" height="1.946ex" role="img" focusable="false" viewBox="0 -666 2225.4 860"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="mo" transform="translate(722.2,0)"><path data-c="2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></g><g data-mml-node="mi" transform="translate(1722.4,0)"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g></g></svg></mjx-container> 比例路径的梯度，那么整层权重的<strong>更新幅度（总梯度）</strong> 就会比不打 Dropout 时平均小 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.138ex" height="1.439ex" role="img" focusable="false" viewBox="0 -442 503 636"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"></path></g></g></g></svg></mjx-container>。</p>
+</li>
+<li><p><strong>训练与测试的等效：</strong></p>
+<p>  在测试时，所有神经元都参与工作，梯度（如果还在训练的话）会由全体分担。在训练时，为了让这少数几个活着的神经元能代表“全体”的更新力度，就必须给它们“加压”，让它们分担那些死掉神经元的更新任务。</p>
+</li>
+</ul>
+<p><strong>我的总结：之所以要除以（1-p）是为了保证在训练同样轮数之后，用了Dropout和没用Dropout对于参数梯度下降的总量是一样的。的确，如果将视角放到一轮中，某些参数的梯度下降被放大了，但是如果将视角放在全局，这个梯度下降被放大的神经元也有p的概率梯度下降为0，这样平均下来，期望正好相等，说明全局来看，对于这个神经元的梯度下降的总量其实与没有应用Dropout该神经元梯度下降的总量是一样的。</strong></p>
+<h4 id="代码实现-1"><a href="#代码实现-1" class="headerlink" title="代码实现"></a>代码实现</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def dropout(X,dropout):</span><br><span class="line">    assert 0&lt;=dropout&lt;=1</span><br><span class="line">    if dropout==1:</span><br><span class="line">        return torch.zeros_like(X)#问题</span><br><span class="line">    if dropout==0:</span><br><span class="line">        return X</span><br><span class="line">    mask = (torch.rand(X.shape)&gt;dropout).float()</span><br><span class="line">    return mask*X/(1.0-dropout)</span><br></pre></td></tr></table></figure>
+<p><code>assert</code> 是 Python 的断言语句，作用是「强制检查条件是否成立」，不成立则直接报错；</p>
+<p>妙用<code>torch.rand(X.shape)</code>：生成一个和 <code>X</code> 形状相同的张量，里面的每个值都是 <strong>0~1 之间的随机数</strong>（均匀分布）；<br><code>&gt; dropout</code>：对张量里的每个随机数做判断：如果随机数 &gt; dropout 率，结果为 <code>1</code>，否则为 <code>0</code>；<br>举例：dropout=0.2 时，随机数 &gt; 0.2 的概率是 80%（对应 80% 的位置为 True），&lt;0.2 的概率是 20%（对应 20% 的位置为 False）；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">num_inputs,num_outputs,num_hidden1,num_hidden2 = 784,10,256,256</span><br><span class="line">dropout1,dropout2 = 0.2,0.5</span><br><span class="line">class Net(nn.Module):</span><br><span class="line">    def __init__(self,num_inputs,num_outputs,num_hidden1,num_hidden2,is_training=True):</span><br><span class="line">        super(Net,self).__init__()</span><br><span class="line">        self.num_inputs = num_inputs</span><br><span class="line">        self.training = is_training</span><br><span class="line">        self.lin1 = nn.Linear(num_inputs,num_hidden1)</span><br><span class="line">        self.lin2 = nn.Linear(num_hidden1,num_hidden2)</span><br><span class="line">        self.lin3 = nn.Linear(num_hidden2,num_outputs)</span><br><span class="line">        self.relu = nn.ReLU()</span><br><span class="line">    </span><br><span class="line">    def forward(self, X):</span><br><span class="line">        H1 = self.relu(self.lin1(X.reshape((-1, self.num_inputs))))</span><br><span class="line">        # 只有在训练模型时才使用dropout</span><br><span class="line">        if self.training == True:</span><br><span class="line">            # 在第一个全连接层之后添加一个dropout层</span><br><span class="line">            H1 = dropout(H1, dropout1)</span><br><span class="line">        H2 = self.relu(self.lin2(H1))</span><br><span class="line">        if self.training == True:</span><br><span class="line">            # 在第二个全连接层之后添加一个dropout层</span><br><span class="line">            H2 = dropout(H2, dropout2)</span><br><span class="line">        out = self.lin3(H2)</span><br><span class="line">        return out</span><br><span class="line">net = Net(num_inputs, num_outputs, num_hidden1, num_hidden2)</span><br></pre></td></tr></table></figure>
+<p>在 Python 中，<code>__init__</code>（前后各两个下划线）是类的<strong>内置构造函数</strong>，当你创建这个类的实例（比如 <code>net = Net()</code>）时，Python 会<strong>自动调用</strong> <code>__init__</code> 函数，用来完成对象的「初始化工作」。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">num_epochs, lr, batch_size = 10, 0.5, 256</span><br><span class="line">loss = nn.CrossEntropyLoss(reduction='none')</span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size)</span><br><span class="line">trainer = torch.optim.SGD(net.parameters(), lr=lr)</span><br><span class="line">d2l.train_ch3(net, train_iter, test_iter, loss, num_epochs,trainer)</span><br></pre></td></tr></table></figure>
+<p>在 <code>d2l</code> 库的 <code>train_ch3</code> 训练函数中，它不仅要更新模型参数，还要<strong>精确统计训练过程中的损失和准确率</strong>。</p>
+<ul>
+<li>如果使用默认的 <code>reduction='mean'</code>：<ul>
+<li><code>loss(y_hat, y)</code> 会直接返回一个标量，即整个批次的平均损失。</li>
+<li>这会导致函数无法获取每个样本的原始损失值，后续统计总损失时只能累加平均损失，这在批次大小不一致（如最后一个批次）时会造成统计误差。</li>
+</ul>
+</li>
+<li>当设置 <code>reduction='none'</code> 时：<ul>
+<li><code>loss(y_hat, y)</code> 返回的是一个形状为 <code>[batch_size]</code> 的张量，其中每个元素对应批次中一个样本的损失。 </li>
+</ul>
+</li>
+</ul>
+<h4 id="代码的简洁实现-1"><a href="#代码的简洁实现-1" class="headerlink" title="代码的简洁实现"></a>代码的简洁实现</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">net1 = nn.Sequential(nn.Flatten(),nn.Linear(num_inputs,num_hidden1),</span><br><span class="line">                    nn.ReLU(),nn.Dropout(dropout1),</span><br><span class="line">                    nn.Linear(num_hidden1,num_hidden2),nn.ReLU(),</span><br><span class="line">                    nn.Dropout(dropout2),nn.Linear(num_hidden2,num_outputs))</span><br><span class="line">def init_weight(m):</span><br><span class="line">    if type(m)==nn.Linear:</span><br><span class="line">        nn.init.normal_(m.weight,std=0.1)</span><br><span class="line"></span><br><span class="line">net1.apply(init_weight)</span><br><span class="line">trainer = torch.optim.SGD(net1.parameters(), lr=lr)</span><br><span class="line">train_ch3(net1, train_iter, test_iter, loss, num_epochs,trainer)</span><br></pre></td></tr></table></figure>
+<p>与前面几章的简洁实现一样</p>
+<h4 id="结果分析-1"><a href="#结果分析-1" class="headerlink" title="结果分析"></a>结果分析</h4><p>有dropout时</p>
+<p><img src="/images/2102.png" style="zoom:80%;"></p>
+<p>没有dropout时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net1 = nn.Sequential(nn.Flatten(),nn.Linear(num_inputs,num_hidden1),</span><br><span class="line">                    nn.ReLU(),</span><br><span class="line">                    nn.Linear(num_hidden1,num_hidden2),nn.ReLU(),</span><br><span class="line">                    nn.Linear(num_hidden2,num_outputs))</span><br></pre></td></tr></table></figure>
+<p><img src="/images/2103.png" style="zoom:80%;"></p>
+<p>可以看到去除了dropout后train loss有一点下降，test acc也有一点下降，说明相对上面有一点过拟合的现象</p>
+<p>当把训练轮数加到20轮时，当有dropout时</p>
+<p><img src="/images/有drop.png" style="zoom:80%;"></p>
+<p>没有dropout时</p>
+<p><img src="/images/无drop.png" style="zoom:80%;"></p>
+<p><strong>这里没有明显的区别我认为是数据集中挑选的训练集和测试集本身的契合度很好</strong><br>但是我发现没有dropout时前几轮的train loss都很大，<strong>我想这是因为去除了 Dropout 的随机失活限制后，全连接结构放大了初始化权重的随机噪声，导致初始预测偏差极大，模型在训练初期处于一种高方差的不稳定状态。</strong></p>
 
         </div>
 
